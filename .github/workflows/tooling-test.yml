@@ -36,9 +36,11 @@ jobs:
         working-directory: guide-tooling
         run: python3 -m unittest discover -s tests
 
-      - name: 인벤토리와 레지스트리 일치 확인
+      - name: 인벤토리, 리뷰 체크리스트와 레지스트리 일치 확인
         working-directory: guide-tooling
-        run: python3 tools/render_inventory.py --check
+        run: |
+          python3 tools/render_inventory.py --check
+          python3 tools/render_review_checklist.py --check
 
       - name: 가이드 저장소 4개 main 오류 검사
         run: |
@@ -52,10 +54,12 @@ jobs:
       - name: 워크플로 복사본 일치 확인
         run: |
           for r in vcf-private-ai vcf-private-ai-apps enterprise-ax-methodology JaeHoYun; do
-            copy="$r/.github/workflows/doc-verify.yml"
-            if [ ! -f "$copy" ]; then
-              echo "::warning title=doc-verify::$r에 doc-verify.yml이 없습니다"
-            elif ! cmp -s guide-tooling/ci/doc-verify.yml "$copy"; then
-              echo "::warning title=doc-verify::$r의 doc-verify.yml이 ci/doc-verify.yml과 다릅니다"
-            fi
+            for wf in doc-verify doc-review; do
+              copy="$r/.github/workflows/$wf.yml"
+              if [ ! -f "$copy" ]; then
+                echo "::warning title=$wf::$r에 $wf.yml이 없습니다"
+              elif ! cmp -s "guide-tooling/ci/$wf.yml" "$copy"; then
+                echo "::warning title=$wf::$r의 $wf.yml이 ci/$wf.yml과 다릅니다"
+              fi
+            done
           done

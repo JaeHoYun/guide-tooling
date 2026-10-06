@@ -236,5 +236,16 @@ class GeneratedBlockTests(unittest.TestCase):
             self.assertEqual({s[2] for s in rcm.status(REG, "JaeHoYun", root)}, {"ok"})
 
 
+
+class ReviewChecklistTests(unittest.TestCase):
+    def test_every_claude_review_rule_has_criteria(self):
+        import render_review_checklist as rrc
+        text = rrc.render(REG)
+        for r in REG["rules"]:
+            if r["level"] == "review" and r["method"] == "claude":
+                self.assertIn("criteria", r, r["id"])
+                self.assertIn(f"### {r['id']}.", text)
+
+
 if __name__ == "__main__":
     unittest.main()

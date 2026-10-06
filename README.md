@@ -21,6 +21,9 @@ VCF Private AI 가이드 시리즈와 AX 가이드에 적용하는 문서 규칙
 | `CLAUDE.md` | 이 저장소에서 규칙을 바꾸는 절차 |
 | `tests/test_verify.py` | 검증 스크립트 회귀 테스트 |
 | `ci/doc-verify.yml` | 가이드 저장소용 GitHub Actions 워크플로 원본. 각 저장소의 `.github/workflows/doc-verify.yml`은 이 파일의 복사본 |
+| `ci/doc-review.yml` | 가이드 저장소용 Claude 리뷰 워크플로 원본. 각 저장소의 `.github/workflows/doc-review.yml`은 이 파일의 복사본 |
+| `tools/render_review_checklist.py` | 리뷰 체크리스트 생성기. `--check`는 생성 결과와 저장된 파일이 같은지 확인 |
+| `docs/review-checklist.md` | 레지스트리에서 생성한 Claude 리뷰 체크리스트. 직접 고치지 않음 |
 | `.github/workflows/tooling-test.yml` | 이 저장소의 CI. 테스트, 인벤토리 일치, 가이드 저장소 4개 main의 오류 검사 |
 
 ## 검사 대상
@@ -48,7 +51,7 @@ skill-vault는 읽기 전용 참조 출처입니다. 문서에 적용되는 skil
 
 ## 현재 상태
 
-규칙 52개와 충돌 7건을 기록했습니다. 오류와 경고 규칙 31개는 `tools/verify.py`가 모두 검사합니다. 리뷰 규칙 21개는 Claude 리뷰 단계에서 다룹니다. 리뷰 체크리스트 생성과 Claude 리뷰 연동은 다음 단계에서 진행합니다. 설계 경과는 [vcf-private-ai#66](https://github.com/JaeHoYun/vcf-private-ai/issues/66)에 기록합니다.
+규칙 52개와 충돌 7건을 기록했습니다. 오류와 경고 규칙 31개는 `tools/verify.py`가 모두 검사합니다. 리뷰 규칙 21개 가운데 판정 규칙 16개와 소유자 확인 규칙 1개는 `doc-review`의 Claude 리뷰가 다루고, 작업 절차 규칙 4개는 CLAUDE.md의 절차로 다룹니다. 설계 경과는 [vcf-private-ai#66](https://github.com/JaeHoYun/vcf-private-ai/issues/66)에 기록합니다.
 
 ## 실행
 
@@ -82,6 +85,7 @@ GitHub Actions가 PR과 main 반영 시점에 검사를 자동으로 실행합�
 | 저장소 | 워크플로 | 검사 이름 | 내용 |
 |--------|----------|-----------|------|
 | 가이드 저장소 4개 | `.github/workflows/doc-verify.yml` | `doc-verify` | 이 저장소의 main을 내려받아 문서 규칙을 검사합니다. 오류가 있으면 실패합니다. PR에서는 경고를 변경된 줄에 대해서만 표시합니다. 저장소 설명(About)도 검사합니다. |
+| 가이드 저장소 4개 | `.github/workflows/doc-review.yml` | `doc-review` | PR이 초안이 아니면 Claude가 바뀐 줄을 리뷰 체크리스트로 판정해 댓글을 남깁니다. 머지를 차단하지 않으므로 필수 상태 검사로 지정하지 않습니다. |
 | guide-tooling | `.github/workflows/tooling-test.yml` | `tooling-test` | 회귀 테스트, 인벤토리 일치, 가이드 저장소 4개 main의 오류 검사, 워크플로 복사본 일치를 확인합니다. |
 
 가이드 저장소의 `doc-verify`는 항상 이 저장소의 main을 사용합니다. 그래서 레지스트리나 스크립트를 바꾸는 PR은 `tooling-test`에서 가이드 저장소 4개 main이 여전히 통과하는지 먼저 확인합니다. 규칙을 강화해 기존 문서가 위반하게 되면, 문서를 고치는 PR을 먼저 머지한 뒤 이 저장소의 PR을 머지합니다.
@@ -97,6 +101,14 @@ GitHub Actions가 PR과 main 반영 시점에 검사를 자동으로 실행합�
 3. Require a pull request before merging을 켭니다. 승인자 수는 0으로 두어도 됩니다.
 4. Require status checks to pass를 켜고 검사 이름(`doc-verify`, guide-tooling은 `tooling-test`)을 추가합니다. 검사 이름은 해당 저장소에서 검사가 한 번 이상 실행된 뒤에 목록에 나타납니다.
 5. 소유자 본인의 직접 수정도 막으려면 Bypass list를 비워 둡니다.
+
+### Claude 리뷰 인증
+
+`doc-review`는 구독 OAuth 토큰으로 Claude를 실행합니다. 토큰이 없으면 리뷰 단계를 생략하고 그 사실을 실행 기록에 표시합니다.
+
+1. Claude Code가 설치된 PC의 터미널에서 `claude setup-token`을 실행해 장기 토큰을 발급합니다. 토큰 사용량은 발급한 사람의 구독 사용량에서 차감됩니다.
+2. 가이드 저장소마다 Settings > Secrets and variables > Actions에서 `CLAUDE_CODE_OAUTH_TOKEN` secret으로 등록합니다.
+3. 토큰을 저장소 파일이나 채팅에 붙여 넣지 않습니다.
 
 ### 익명화 검사
 
