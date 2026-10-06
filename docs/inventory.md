@@ -8,12 +8,12 @@
 
 | 구분 | 규칙 수 |
 |------|--------:|
-| 전체 | 52 |
+| 전체 | 51 |
 | 수준: 오류 | 10 |
-| 수준: 경고 | 21 |
+| 수준: 경고 | 20 |
 | 수준: 리뷰 | 21 |
-| 상태: 범위 확대 | 7 |
-| 상태: 문서 규칙만 존재 | 21 |
+| 상태: 범위 확대 | 8 |
+| 상태: 문서 규칙만 존재 | 19 |
 | 상태: 신규 | 20 |
 | 상태: 충돌 정리 | 4 |
 | skill-vault를 출처로 포함 | 14 |
@@ -41,8 +41,8 @@
 | ID | 규칙 | 수준 | 방식 | 적용 범위 | 상태 | 출처 |
 |----|------|------|------|-----------|------|------|
 | STR-H1 | 문서 H1 형식 | 오류 | 구조 | vcf-private-ai, vcf-private-ai-apps, enterprise-ax-methodology | 범위 확대 | vcf-private-ai/CONVENTIONS.md 3절<br>vcf-private-ai-apps/CLAUDE.md 규칙 3 예외 조항<br>enterprise-ax-methodology 관행(문서화되지 않음) |
-| STR-HEADING-NUMBER | 본문 헤딩 번호 체계(H2 N.M, H3 N.M.K, H4 이하 무번호) | 경고 | 구조 | vcf-private-ai | 문서 규칙만 존재 | vcf-private-ai/CONVENTIONS.md 4절 |
-| STR-META-UNNUMBERED | 메타 섹션(참고 출처, 요약, 면책)은 무번호 | 경고 | 구조 | vcf-private-ai | 문서 규칙만 존재 | vcf-private-ai/CONVENTIONS.md 5절 |
+| STR-HEADING-NUMBER | 본문 헤딩 번호 체계(H2 N.M, H3 N.M.K, H4 이하 무번호) | 경고 | 구조 | vcf-private-ai, vcf-private-ai-apps, enterprise-ax-methodology | 범위 확대 | vcf-private-ai/CONVENTIONS.md 4절 |
+| STR-META-UNNUMBERED | 메타 섹션(참고 출처, 요약, 면책)은 무번호 | 경고 | 구조 | vcf-private-ai, vcf-private-ai-apps, enterprise-ax-methodology | 문서 규칙만 존재 | vcf-private-ai/CONVENTIONS.md 5절 |
 | STR-CIRCLED-HEADING | 본문 헤딩에 원숫자(①②) 사용 금지 | 오류 | 구조 | vcf-private-ai | 문서 규칙만 존재 | vcf-private-ai/CONVENTIONS.md 1절 |
 | STR-FILE-LAYOUT | 파일 배치와 이름(docs/NN-slug.md, appendix/AN-slug.md, docs/E0-*.md) | 오류 | 구조 | vcf-private-ai | 문서 규칙만 존재 | vcf-private-ai/CONVENTIONS.md 2절 |
 | STR-LABEL | 라벨형 문장은 **라벨.** 본문 형식, 질문형 라벨은 물음표로 종결 | 경고 | 정규식 | 전체 | 문서 규칙만 존재 | 세 저장소 CLAUDE.md 대시 규칙 |
@@ -64,8 +64,7 @@
 |----|------|------|------|-----------|------|------|
 | WORD-ONE-SYLLABLE | 한 글자 동사로 문장을 끝내지 않기 | 경고 | 단어 목록 | 전체 | 문서 규칙만 존재 | 세 저장소 CLAUDE.md 규칙 1<br>전역 지침 style(동사·은유 표현) |
 | WORD-GE-DOEDA | 결과의 …게 됩니다, 사물 주어 사역의 …게 합니다, 뜻이 흐린 …이 됩니다를 실제 동사로 교체 | 경고 | 정규식 | 전체 | 문서 규칙만 존재 | 세 저장소 CLAUDE.md 규칙 1<br>전역 지침 style |
-| WORD-SPATIAL | 방향과 공간 은유 대신 실제 동작 사용 | 경고 | 단어 목록 | 전체 | 문서 규칙만 존재 | 세 저장소 CLAUDE.md 규칙 2<br>전역 지침 style(방향·공간 은유) |
-| WORD-REPO-SUBSTITUTE | 저장소에서 정한 대체어 사용 | 경고 | 단어 목록 | vcf-private-ai-apps | 문서 규칙만 존재 | vcf-private-ai-apps/CLAUDE.md 이 저장소에서 정한 대체어 |
+| WORD-SPATIAL | 방향과 공간 은유, 비유 대신 실제 동작 사용 | 경고 | 단어 목록 | 전체 | 문서 규칙만 존재 | 세 저장소 CLAUDE.md 규칙 2<br>vcf-private-ai-apps/CLAUDE.md 이 저장소에서 정한 대체어<br>전역 지침 style(방향·공간 은유) |
 | WORD-TRANSLATIONESE | 번역투 표현 회피 | 경고 | 단어 목록 | 전체 | 신규 | 전역 지침 style(번역투)<br>skill-vault:skills/narrative-architect/principles/prose-voice.md 1절<br>skill-vault:skills/narrative-architect/principles/anti-ai-tell.md 3-1절 |
 | WORD-CLICHE | 근거 없는 상투어 금지 | 경고 | 단어 목록 | 전체 | 신규 | skill-vault:skills/narrative-architect/principles/anti-ai-tell.md 3절 |
 | WORD-QUOTED-HEADLINE | 제목에 따옴표 사용 금지 | 경고 | 정규식 | 전체 | 신규 | 전역 지침 02 |

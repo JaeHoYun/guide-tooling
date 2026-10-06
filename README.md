@@ -41,7 +41,7 @@ skill-vault는 읽기 전용 참조 출처입니다. 문서에 적용되는 skil
 
 ## 현재 상태
 
-레지스트리 초안 단계입니다. 규칙 52개와 충돌 7건을 기록했습니다. 검증 스크립트 개정, CLAUDE.md 생성, GitHub Actions 연동은 다음 단계에서 진행합니다. 설계 경과는 [vcf-private-ai#66](https://github.com/JaeHoYun/vcf-private-ai/issues/66)에 기록합니다.
+레지스트리 초안 단계입니다. 규칙 51개와 충돌 7건을 기록했습니다. 검증 스크립트 개정, CLAUDE.md 생성, GitHub Actions 연동은 다음 단계에서 진행합니다. 설계 경과는 [vcf-private-ai#66](https://github.com/JaeHoYun/vcf-private-ai/issues/66)에 기록합니다.
 
 ## 실행
 
