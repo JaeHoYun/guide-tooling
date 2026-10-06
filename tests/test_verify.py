@@ -168,5 +168,73 @@ class RegistryTests(unittest.TestCase):
                 self.assertIn(r["id"], verify.CHECKS, r["id"])
 
 
+import render_claude_md as rcm  # noqa: E402
+
+
+class GeneratedBlockTests(unittest.TestCase):
+    def make_repo(self, tmp, profile="vcf-private-ai"):
+        root = os.path.join(tmp, REG["profiles"][profile]["repo"].split("/")[1])
+        os.makedirs(root)
+        names = rcm.blocks_for(REG["profiles"][profile])
+        files = {}
+        for name in names:
+            fname = rcm.BLOCKS[name][0]
+            files.setdefault(fname, "# 제목\n\n직접 작성한 설명\n\n")
+            files[fname] += f"<!-- guide-tooling:begin {name} -->\n<!-- guide-tooling:end {name} sha256=000000000000 -->\n\n"
+        for fname, text in files.items():
+            with open(os.path.join(root, fname), "w", encoding="utf-8") as f:
+                f.write(text)
+        return root
+
+    def test_every_profile_renders(self):
+        for pid, p in REG["profiles"].items():
+            for name in rcm.blocks_for(p):
+                body = rcm.render_block(REG, pid, name)
+                self.assertNotIn("{{", body)
+                self.assertTrue(body.endswith("\n"))
+
+    def test_update_then_ok_and_handwritten_part_kept(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self.make_repo(tmp)
+            rcm.update(REG, "vcf-private-ai", root)
+            self.assertEqual({s[2] for s in rcm.status(REG, "vcf-private-ai", root)}, {"ok"})
+            with open(os.path.join(root, "CLAUDE.md"), encoding="utf-8") as f:
+                self.assertIn("직접 작성한 설명", f.read())
+
+    def test_edited_is_error_and_stale_is_warning(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self.make_repo(tmp)
+            rcm.update(REG, "vcf-private-ai", root)
+            path = os.path.join(root, "CLAUDE.md")
+            with open(path, encoding="utf-8") as f:
+                text = f.read()
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(text.replace("## 문장 규칙", "## 문장 규칙 수정", 1))
+            ctx = verify.Context(REG, "vcf-private-ai", root, tmp, None)
+            ctx, _ = verify.verify(REG, ctx, ["STR-GENERATED-SYNC"])
+            self.assertEqual([f[0] for f in ctx.findings], ["error"])
+
+            reg = copy.deepcopy(REG)
+            reg["baseline"]["pais_ga"] = "2099-01-01"
+            rcm.update(REG, "vcf-private-ai", root)
+            ctx = verify.Context(reg, "vcf-private-ai", root, tmp, None)
+            ctx, _ = verify.verify(reg, ctx, ["STR-GENERATED-SYNC"])
+            self.assertEqual([f[0] for f in ctx.findings], ["warn"])
+
+    def test_crlf_preserved(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self.make_repo(tmp, "JaeHoYun")
+            path = os.path.join(root, "CLAUDE.md")
+            with open(path, encoding="utf-8") as f:
+                text = f.read()
+            with open(path, "w", encoding="utf-8", newline="") as f:
+                f.write(text.replace("\n", "\r\n"))
+            rcm.update(REG, "JaeHoYun", root)
+            with open(path, encoding="utf-8", newline="") as f:
+                raw = f.read()
+            self.assertNotIn("\n", raw.replace("\r\n", ""))
+            self.assertEqual({s[2] for s in rcm.status(REG, "JaeHoYun", root)}, {"ok"})
+
+
 if __name__ == "__main__":
     unittest.main()

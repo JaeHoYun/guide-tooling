@@ -8,13 +8,13 @@
 
 | 구분 | 규칙 수 |
 |------|--------:|
-| 전체 | 51 |
-| 수준: 오류 | 11 |
+| 전체 | 52 |
+| 수준: 오류 | 12 |
 | 수준: 경고 | 19 |
 | 수준: 리뷰 | 21 |
 | 상태: 범위 확대 | 8 |
 | 상태: 문서 규칙만 존재 | 19 |
-| 상태: 신규 | 20 |
+| 상태: 신규 | 21 |
 | 상태: 충돌 정리 | 4 |
 | skill-vault를 출처로 포함 | 14 |
 
@@ -45,6 +45,7 @@
 | STR-META-UNNUMBERED | 메타 섹션(참고 출처, 요약, 면책)은 무번호 | 경고 | 구조 | vcf-private-ai, vcf-private-ai-apps, enterprise-ax-methodology | 문서 규칙만 존재 | vcf-private-ai/CONVENTIONS.md 5절 |
 | STR-CIRCLED-HEADING | 본문 헤딩에 원숫자(①②) 사용 금지 | 오류 | 구조 | vcf-private-ai | 문서 규칙만 존재 | vcf-private-ai/CONVENTIONS.md 1절 |
 | STR-FILE-LAYOUT | 파일 배치와 이름(docs/NN-slug.md, appendix/AN-slug.md, docs/E0-*.md) | 오류 | 구조 | vcf-private-ai | 문서 규칙만 존재 | vcf-private-ai/CONVENTIONS.md 2절 |
+| STR-GENERATED-SYNC | CLAUDE.md와 CONVENTIONS.md의 생성 구간을 직접 고치지 않음 | 오류 | 구조 | 전체 | 신규 | 이슈 vcf-private-ai#66 결정 D3-a, 생성 위치 가 |
 | STR-LABEL | 라벨형 문장은 **라벨.** 본문 형식, 질문형 라벨은 물음표로 종결 | 오류 | 정규식 | 전체 | 문서 규칙만 존재 | 세 저장소 CLAUDE.md 대시 규칙 |
 | STR-NO-FORM | 빈칸을 채우는 양식 금지 | 경고 | 구조 | 전체 | 신규 | 세 저장소 CLAUDE.md 작성 원칙(양식 대신 운영 기준, 안내와 양식의 분리)<br>vcf-private-ai/CONVENTIONS.md 2절 |
 | STR-CALC-TABLE-TERM | 본문 안의 계산 표는 '산정 표'로 지칭 | 경고 | 단어 목록 | vcf-private-ai, vcf-private-ai-apps | 문서 규칙만 존재 | vcf-private-ai/CLAUDE.md 작성 원칙<br>vcf-private-ai-apps/CLAUDE.md 작성 원칙 |

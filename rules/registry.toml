@@ -46,6 +46,7 @@ vcf = "9.1.1"
 paif = "9.1.1"
 pais = "3.0"
 pais_ga = "2026-09-03"
+previous = "VCF 9.1 / PAIS 2.1"
 previous_tag = "baseline-pais-2.1"
 note = "가이드 저장소의 기준선이다. skill-vault vcf-korea-ea는 VCF 9.1 / PAIF 9.1 / PAIS 2.1을 유지하며, 차이는 비교표로만 보고한다."
 
@@ -61,6 +62,8 @@ h1_pattern = '^# [A-Z]?\d+ — \S'
 h1_example = "# 05 — 제목"
 uses_baseline = true
 uses_conventions = true
+baseline_extra = "선언 문구와 상세 버전표 규약은 [CONVENTIONS.md](CONVENTIONS.md)를 따릅니다."
+form_text = "빈칸을 채우는 양식(워크시트)은 싣지 않습니다. 실제 운영에서 양식이 필요한 내용은 본문에 무엇을, 어떤 기준으로, 누가 언제, 어떻게 측정하고, 어떻게 개선하는지의 다섯 요소로 서술합니다. 수식으로 연쇄 계산해야 하는 내용만 예외로 ⑥ 계산 워크북에 수록합니다. 본문 안의 계산 표는 \"산정 표\"로 부릅니다. AX 가이드는 착수 전 단계의 안내라 양식 없이 끝까지 채운 가상 예시만 싣습니다. 앱 가이드도 같은 원칙을 적용해 양식을 본문 운영 기준으로 통합했고, 계산 도구는 따로 마련하지 않습니다."
 
 [profiles.vcf-private-ai-apps]
 repo = "JaeHoYun/vcf-private-ai-apps"
@@ -70,6 +73,7 @@ h1_pattern = '^# [A-Z]?\d+ — \S'
 h1_example = "# 05 — 제목"
 uses_baseline = true
 uses_conventions = false
+form_text = "빈칸을 채우는 양식(워크시트)은 싣지 않습니다. 실제 운영에서 양식이 필요한 내용은 본문에 무엇을, 어떤 기준으로, 누가 언제, 어떻게 측정하고, 어떻게 개선하는지의 다섯 요소로 서술합니다. 수식으로 연쇄 계산해야 하는 내용만 예외로 플랫폼 가이드의 ⑥ 계산 워크북에 수록하고, 이 가이드는 계산 도구를 따로 마련하지 않습니다. 본문 안의 계산 표는 \"산정 표\"로 부릅니다. AX 가이드는 착수 전 단계의 안내라 양식 없이 끝까지 채운 가상 예시만 싣습니다."
 
 [profiles.enterprise-ax-methodology]
 repo = "JaeHoYun/enterprise-ax-methodology"
@@ -79,6 +83,9 @@ h1_pattern = '^# [A-Z]?\d+\. \S'
 h1_example = "# 03. 제목"
 uses_baseline = false
 uses_conventions = false
+baseline_text = "이 가이드는 벤더 중립이라 특정 제품 버전을 전제하지 않습니다. 기준선 버전과 기준선 태그를 설정하지 않습니다. 제품 버전 기준선({declaration})은 플랫폼 가이드와 앱 가이드에서 관리합니다."
+form_title = "안내와 양식의 분리"
+form_text = "이 가이드는 착수 전 단계의 안내라 빈칸을 채우는 양식을 수록하지 않습니다. 대신 끝까지 채운 가상 예시를 싣습니다. 플랫폼 가이드와 앱 가이드도 빈칸 양식을 싣지 않고 운영 기준을 본문에 서술합니다. 수식으로 연쇄 계산하는 도구만 플랫폼 가이드의 ⑥ 계산 워크북에 수록합니다."
 note = "벤더 중립 가이드라 기준선을 설정하지 않는다. H1 형식은 지금까지 CLAUDE.md에 적혀 있지 않았고 관행으로만 유지됐다."
 
 [profiles.JaeHoYun]
@@ -86,6 +93,9 @@ repo = "JaeHoYun/JaeHoYun"
 title = "GitHub 프로필 README"
 uses_baseline = true
 uses_conventions = false
+baseline_text = "플랫폼 가이드와 앱 가이드의 기준선({declaration}, {pais_ga} GA)을 README 하단 고지 블록에 표기합니다. 기준선이 바뀌면 고지 블록과 가이드 소개 문장을 함께 고칩니다."
+form_title = "양식"
+form_text = "README는 가이드를 소개하고 읽는 순서를 안내하는 문서라 양식을 싣지 않습니다. 가이드의 양식 원칙은 각 가이드 저장소의 CLAUDE.md를 따릅니다."
 note = "지금까지 CLAUDE.md가 없어 어떤 규칙도 적용되지 않았다."
 
 # ---------------------------------------------------------------------------
@@ -297,6 +307,16 @@ status = "문서 규칙만 존재"
 sources = ["vcf-private-ai/CONVENTIONS.md 2절"]
 exceptions = ["06-sizing-cost/worksheet/ 계산 도구"]
 allow = ["(^|/)worksheet/"]
+
+[[rules]]
+id = "STR-GENERATED-SYNC"
+title = "CLAUDE.md와 CONVENTIONS.md의 생성 구간을 직접 고치지 않음"
+level = "error"
+method = "structure"
+scope = ["all"]
+status = "신규"
+sources = ["이슈 vcf-private-ai#66 결정 D3-a, 생성 위치 가"]
+note = "생성 구간을 손으로 고쳐 종료 표시의 sha256과 내용이 다르면 오류다. 레지스트리나 템플릿이 바뀌어 다시 생성해야 하는 상태와 생성 구간이 없는 상태는 경고다."
 
 [[rules]]
 id = "STR-LABEL"

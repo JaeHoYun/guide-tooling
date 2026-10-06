@@ -496,6 +496,25 @@ def check_anonymize(ctx, rule, doc):
             ctx.add(rule, doc, no, "고객사 이름이 포함됨")
 
 
+def check_generated_sync(ctx, rule, doc):
+    """CLAUDE.md, CONVENTIONS.md의 생성 구간 상태를 저장소당 한 번 검사한다."""
+    if getattr(ctx, "generated_checked", False):
+        return
+    ctx.generated_checked = True
+    import render_claude_md as rcm
+
+    messages = {
+        "edited": ("error", "생성 구간을 직접 고쳤습니다. guide-tooling의 레지스트리나 템플릿을 고친 뒤 다시 생성하십시오"),
+        "stale": ("warn", "레지스트리나 템플릿이 바뀌었습니다. guide-tooling의 tools/render_claude_md.py로 다시 생성하십시오"),
+        "missing": ("warn", "생성 구간이 없습니다"),
+    }
+    for fname, name, st in rcm.status(ctx.reg, ctx.profile_id, ctx.root):
+        if st == "ok":
+            continue
+        level, msg = messages[st]
+        ctx.findings.append((level, rule["id"], f"{fname}:1", f"'{name}' 구간: {msg}"))
+
+
 def check_changed_only(inner):
     def check(ctx, rule, doc):
         if ctx.diff_lines is None:
@@ -525,6 +544,7 @@ CHECKS = {
     "STR-CIRCLED-HEADING": check_circled_heading,
     "STR-FILE-LAYOUT": check_file_layout,
     "STR-LABEL": check_label,
+    "STR-GENERATED-SYNC": check_generated_sync,
     "STR-NO-FORM": check_no_form,
     "STR-CALC-TABLE-TERM": check_detect_list,
     "LINK-TARGET": check_link_target,
