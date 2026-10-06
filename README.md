@@ -17,6 +17,8 @@ VCF Private AI 가이드 시리즈와 AX 가이드에 적용하는 문서 규칙
 | `tools/render_inventory.py` | 인벤토리 생성기. `--check`는 생성 결과와 저장된 파일이 같은지 확인 |
 | `tools/verify.py` | 검증 스크립트. 레지스트리를 읽어 저장소 프로필에 맞는 오류, 경고 규칙을 실행 |
 | `tests/test_verify.py` | 검증 스크립트 회귀 테스트 |
+| `ci/doc-verify.yml` | 가이드 저장소용 GitHub Actions 워크플로 원본. 각 저장소의 `.github/workflows/doc-verify.yml`은 이 파일의 복사본 |
+| `.github/workflows/tooling-test.yml` | 이 저장소의 CI. 테스트, 인벤토리 일치, 가이드 저장소 4개 main의 오류 검사 |
 
 ## 검사 대상
 
@@ -69,6 +71,33 @@ python3 tools/verify.py --list                                     # 규칙별 �
 - 오류가 하나라도 있으면 종료 코드 1을 반환합니다. 경고는 종료 코드에 영향을 주지 않습니다.
 - `--format github`는 GitHub Actions 주석 형식으로 출력합니다.
 - `CUSTOMER_NAMES` 환경 변수(쉼표나 줄바꿈으로 구분)가 있을 때만 익명화 검사를 실행합니다. 고객사 이름은 이 저장소에 기록하지 않습니다.
+
+## CI
+
+GitHub Actions가 PR과 main 반영 시점에 검사를 자동으로 실행합니다.
+
+| 저장소 | 워크플로 | 검사 이름 | 내용 |
+|--------|----------|-----------|------|
+| 가이드 저장소 4개 | `.github/workflows/doc-verify.yml` | `doc-verify` | 이 저장소의 main을 내려받아 문서 규칙을 검사합니다. 오류가 있으면 실패합니다. PR에서는 경고를 변경된 줄에 대해서만 표시합니다. 저장소 설명(About)도 검사합니다. |
+| guide-tooling | `.github/workflows/tooling-test.yml` | `tooling-test` | 회귀 테스트, 인벤토리 일치, 가이드 저장소 4개 main의 오류 검사, 워크플로 복사본 일치를 확인합니다. |
+
+가이드 저장소의 `doc-verify`는 항상 이 저장소의 main을 사용합니다. 그래서 레지스트리나 스크립트를 바꾸는 PR은 `tooling-test`에서 가이드 저장소 4개 main이 여전히 통과하는지 먼저 확인합니다. 규칙을 강화해 기존 문서가 위반하게 되면, 문서를 고치는 PR을 먼저 머지한 뒤 이 저장소의 PR을 머지합니다.
+
+워크플로를 바꿀 때는 `ci/doc-verify.yml`을 고친 뒤 4개 저장소에 그대로 복사합니다. 복사본이 원본과 다르면 `tooling-test`가 경고를 표시합니다.
+
+### 머지 차단 설정
+
+검사 결과로 머지를 차단하려면 저장소마다 아래 설정이 필요합니다. 저장소 소유자가 GitHub 웹에서 설정합니다.
+
+1. 저장소의 Settings > Rules > Rulesets에서 New ruleset > New branch ruleset을 선택합니다.
+2. Enforcement status를 Active로, Target branches에 기본 브랜치(main)를 추가합니다.
+3. Require a pull request before merging을 켭니다. 승인자 수는 0으로 두어도 됩니다.
+4. Require status checks to pass를 켜고 검사 이름(`doc-verify`, guide-tooling은 `tooling-test`)을 추가합니다. 검사 이름은 해당 저장소에서 검사가 한 번 이상 실행된 뒤에 목록에 나타납니다.
+5. 소유자 본인의 직접 수정도 막으려면 Bypass list를 비워 둡니다.
+
+### 익명화 검사
+
+고객사 이름 목록은 저장소마다 Settings > Secrets and variables > Actions에서 `CUSTOMER_NAMES` secret으로 등록합니다. 쉼표나 줄바꿈으로 구분합니다. 등록하지 않으면 익명화 검사를 건너뛰고 그 사실을 결과 요약에 표시합니다.
 
 ### 오탐 처리
 

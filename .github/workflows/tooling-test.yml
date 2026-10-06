@@ -1,0 +1,61 @@
+# guide-tooling 자체 검사
+#
+# 레지스트리나 검증 스크립트를 바꾸면 가이드 저장소 4개의 main이 그 변경으로 실패하지 않는지
+# 머지 전에 확인합니다. 가이드 저장소의 doc-verify는 항상 이 저장소의 main을 사용하기 때문입니다.
+name: tooling-test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tooling-test:
+    name: tooling-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: guide-tooling
+
+      - name: 가이드 저장소 clone
+        run: |
+          for r in vcf-private-ai vcf-private-ai-apps enterprise-ax-methodology JaeHoYun; do
+            git clone --depth 1 --quiet "https://github.com/JaeHoYun/$r.git" "$r"
+          done
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 회귀 테스트
+        working-directory: guide-tooling
+        run: python3 -m unittest discover -s tests
+
+      - name: 인벤토리와 레지스트리 일치 확인
+        working-directory: guide-tooling
+        run: python3 tools/render_inventory.py --check
+
+      - name: 가이드 저장소 4개 main 오류 검사
+        run: |
+          fail=0
+          for r in vcf-private-ai vcf-private-ai-apps enterprise-ax-methodology JaeHoYun; do
+            echo "== $r"
+            python3 guide-tooling/tools/verify.py --repo "$r" --level error --format github || fail=1
+          done
+          exit $fail
+
+      - name: 워크플로 복사본 일치 확인
+        run: |
+          for r in vcf-private-ai vcf-private-ai-apps enterprise-ax-methodology JaeHoYun; do
+            copy="$r/.github/workflows/doc-verify.yml"
+            if [ ! -f "$copy" ]; then
+              echo "::warning title=doc-verify::$r에 doc-verify.yml이 없습니다"
+            elif ! cmp -s guide-tooling/ci/doc-verify.yml "$copy"; then
+              echo "::warning title=doc-verify::$r의 doc-verify.yml이 ci/doc-verify.yml과 다릅니다"
+            fi
+          done
