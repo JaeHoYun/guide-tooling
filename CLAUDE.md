@@ -12,13 +12,15 @@
 | `tools/render_claude_md.py` | 생성 구간 생성기 | 예 |
 | `tools/render_inventory.py` | 인벤토리 생성기 | 예 |
 | `docs/inventory.md` | 레지스트리에서 생성한 인벤토리 | 아니요 |
+| `docs/review-checklist.md` | 레지스트리에서 생성한 Claude 리뷰 체크리스트 | 아니요 |
+| `ci/doc-review.yml` | 가이드 저장소 Claude 리뷰 워크플로 원본 | 예. 고친 뒤 4개 저장소에 그대로 복사 |
 | `ci/doc-verify.yml` | 가이드 저장소 워크플로 원본 | 예. 고친 뒤 4개 저장소에 그대로 복사 |
 
 ## 규칙을 바꾸는 절차
 
 1. 레지스트리나 템플릿을 고칩니다. 검출 규칙을 바꾸면 `tests/test_verify.py`에 사례를 추가합니다.
-2. `python3 tools/render_inventory.py`로 인벤토리를 다시 생성합니다.
-3. `python3 -m unittest discover -s tests`와 `python3 tools/render_inventory.py --check`를 실행합니다.
+2. `python3 tools/render_inventory.py`와 `python3 tools/render_review_checklist.py`로 인벤토리와 리뷰 체크리스트를 다시 생성합니다. 리뷰 규칙을 추가하면 판정 기준(`criteria`)을 함께 적습니다.
+3. `python3 -m unittest discover -s tests`를 실행합니다.
 4. 가이드 저장소 4개를 같은 상위 폴더에 clone하고 `python3 tools/verify.py --repo ../<저장소> --level error`로 오류가 새로 생기지 않는지 확인합니다.
 5. PR을 만들고 `tooling-test` 검사가 통과한 뒤 머지합니다.
 6. 머지한 뒤 가이드 저장소마다 `python3 tools/render_claude_md.py --repo ../<저장소>`로 생성 구간을 다시 생성하고 PR을 만듭니다. 생성 구간이 오래되면 `doc-verify`가 경고를 표시합니다.
