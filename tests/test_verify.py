@@ -144,6 +144,15 @@ class ContentTests(unittest.TestCase):
         self.assertEqual(ids(found), ["PRS-PAREN-CONFLATE"])
 
 
+class ChangedLineTests(unittest.TestCase):
+    def test_in_changed_lines(self):
+        diff = {"a.md": {2}}
+        self.assertTrue(verify.in_changed_lines(("warn", "X", "a.md:2", ""), diff))
+        self.assertFalse(verify.in_changed_lines(("warn", "X", "a.md:1", ""), diff))
+        self.assertFalse(verify.in_changed_lines(("warn", "X", "b.md:2", ""), diff))
+        self.assertTrue(verify.in_changed_lines(("warn", "X", "저장소 설명", ""), diff))
+
+
 class WaiverTests(unittest.TestCase):
     def test_waiver_suppresses_finding(self):
         reg = copy.deepcopy(REG)

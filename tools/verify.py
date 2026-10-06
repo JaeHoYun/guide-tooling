@@ -14,6 +14,7 @@
   python3 tools/verify.py --repo ../vcf-private-ai --rule DASH-JOIN     # 특정 규칙만
   python3 tools/verify.py --repo . --profile JaeHoYun                   # 프로필 지정
   python3 tools/verify.py --repo ../vcf-private-ai --diff-base origin/main   # 변경된 줄 전용 규칙 포함
+  python3 tools/verify.py --repo ../vcf-private-ai --diff-base origin/main --warn-changed-only   # PR용
   python3 tools/verify.py --profile vcf-private-ai --description "저장소 설명"  # 저장소 설명(About)만 검사
   python3 tools/verify.py --list                                         # 규칙별 구현 상태
 
@@ -634,6 +635,14 @@ def verify(reg, ctx, only=None, description=None):
     return ctx, waived
 
 
+def in_changed_lines(finding, diff_lines):
+    loc = finding[2]
+    if ":" not in loc:
+        return True  # 저장소 설명처럼 줄 번호가 없는 항목
+    file, line = loc.rsplit(":", 1)
+    return int(line) in diff_lines.get(file, set())
+
+
 def detect_profile(reg, repo_root):
     name = os.path.basename(os.path.abspath(repo_root))
     for pid, p in reg["profiles"].items():
@@ -663,6 +672,8 @@ def main():
     ap.add_argument("--level", choices=["error", "warn"], default="warn", help="출력할 최저 수준(기본: warn)")
     ap.add_argument("--rule", action="append", help="실행할 규칙 ID(여러 번 지정 가능)")
     ap.add_argument("--diff-base", help="변경된 줄 전용 규칙의 비교 기준(예: origin/main)")
+    ap.add_argument("--warn-changed-only", action="store_true",
+                    help="--diff-base와 함께 사용. 경고는 변경된 줄에 대해서만 출력(오류는 항상 전체 출력)")
     ap.add_argument("--description", help="저장소 설명(About) 문자열")
     ap.add_argument("--format", choices=["text", "github"], default="text", help="github는 Actions 주석 형식")
     ap.add_argument("--list", action="store_true", help="규칙별 구현 상태 출력")
@@ -688,6 +699,12 @@ def main():
         if unknown:
             ap.error(f"알 수 없는 규칙: {', '.join(sorted(unknown))}")
     ctx, waived = verify(reg, ctx, args.rule, args.description)
+    if args.warn_changed_only and diff_lines is not None:
+        before = sum(1 for f in ctx.findings if f[0] == "warn")
+        ctx.findings = [f for f in ctx.findings if f[0] == "error" or in_changed_lines(f, diff_lines)]
+        hidden = before - sum(1 for f in ctx.findings if f[0] == "warn")
+        if hidden:
+            ctx.notes.append(f"변경되지 않은 줄의 경고 {hidden}건은 출력하지 않음(--warn-changed-only)")
     shown = [f for f in ctx.findings if LEVEL_ORDER[f[0]] <= LEVEL_ORDER[args.level]]
     shown.sort(key=lambda f: (LEVEL_ORDER[f[0]], f[1], f[2]))
     for level, rid, loc, msg in shown:
