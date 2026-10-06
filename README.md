@@ -6,7 +6,7 @@ VCF Private AI 가이드 시리즈와 AX 가이드에 적용하는 문서 규칙
 
 문서 규칙이 다섯 곳에 흩어져 있었습니다. 세 저장소의 CLAUDE.md, vcf-private-ai의 CONVENTIONS.md와 `verify_repo.py`, 작성자의 전역 지침, skill-vault 스킬 문서입니다. 같은 규칙이 출처마다 조금씩 달랐고, 서로 충돌하는 규칙도 있었습니다. 검증 스크립트는 vcf-private-ai 한 저장소만 검사했습니다.
 
-이 저장소는 규칙의 원본을 `rules/registry.toml` 한 파일로 모읍니다. 각 저장소의 CLAUDE.md 문장 규칙 절, 검증 스크립트의 검사 정의, Claude 리뷰 체크리스트는 모두 이 파일에서 생성합니다.
+이 저장소는 규칙의 원본을 `rules/registry.toml` 한 파일로 모읍니다. 규칙의 문장은 `templates/`에 있습니다. 각 저장소 CLAUDE.md의 규칙 부분, 검증 스크립트의 검사 정의, 인벤토리는 모두 이 두 곳에서 생성합니다.
 
 ## 구성
 
@@ -16,6 +16,9 @@ VCF Private AI 가이드 시리즈와 AX 가이드에 적용하는 문서 규칙
 | `docs/inventory.md` | 레지스트리에서 생성한 인벤토리 표. 직접 고치지 않음 |
 | `tools/render_inventory.py` | 인벤토리 생성기. `--check`는 생성 결과와 저장된 파일이 같은지 확인 |
 | `tools/verify.py` | 검증 스크립트. 레지스트리를 읽어 저장소 프로필에 맞는 오류, 경고 규칙을 실행 |
+| `templates/` | 가이드 저장소 CLAUDE.md와 CONVENTIONS.md 생성 구간의 문장 원본 |
+| `tools/render_claude_md.py` | 생성기. 레지스트리와 템플릿으로 각 저장소의 생성 구간을 다시 생성 |
+| `CLAUDE.md` | 이 저장소에서 규칙을 바꾸는 절차 |
 | `tests/test_verify.py` | 검증 스크립트 회귀 테스트 |
 | `ci/doc-verify.yml` | 가이드 저장소용 GitHub Actions 워크플로 원본. 각 저장소의 `.github/workflows/doc-verify.yml`은 이 파일의 복사본 |
 | `.github/workflows/tooling-test.yml` | 이 저장소의 CI. 테스트, 인벤토리 일치, 가이드 저장소 4개 main의 오류 검사 |
@@ -45,7 +48,7 @@ skill-vault는 읽기 전용 참조 출처입니다. 문서에 적용되는 skil
 
 ## 현재 상태
 
-규칙 51개와 충돌 7건을 기록했습니다. 오류와 경고 규칙 30개는 `tools/verify.py`가 모두 검사합니다. 리뷰 규칙 21개는 Claude 리뷰 단계에서 다룹니다. CLAUDE.md 생성, 리뷰 체크리스트 생성, GitHub Actions 연동은 다음 단계에서 진행합니다. vcf-private-ai의 `verify_repo.py`는 CLAUDE.md를 전환할 때 함께 폐기합니다. 설계 경과는 [vcf-private-ai#66](https://github.com/JaeHoYun/vcf-private-ai/issues/66)에 기록합니다.
+규칙 52개와 충돌 7건을 기록했습니다. 오류와 경고 규칙 31개는 `tools/verify.py`가 모두 검사합니다. 리뷰 규칙 21개는 Claude 리뷰 단계에서 다룹니다. 리뷰 체크리스트 생성과 Claude 리뷰 연동은 다음 단계에서 진행합니다. 설계 경과는 [vcf-private-ai#66](https://github.com/JaeHoYun/vcf-private-ai/issues/66)에 기록합니다.
 
 ## 실행
 
@@ -98,6 +101,26 @@ GitHub Actions가 PR과 main 반영 시점에 검사를 자동으로 실행합�
 ### 익명화 검사
 
 고객사 이름 목록은 저장소마다 Settings > Secrets and variables > Actions에서 `CUSTOMER_NAMES` secret으로 등록합니다. 쉼표나 줄바꿈으로 구분합니다. 등록하지 않으면 익명화 검사를 건너뛰고 그 사실을 결과 요약에 표시합니다.
+
+## 생성 구간
+
+가이드 저장소의 CLAUDE.md(vcf-private-ai는 CONVENTIONS.md 3, 4, 5, 7절도)에는 아래 표시로 둘러싼 생성 구간이 있습니다. 생성 구간 밖은 저장소마다 직접 작성합니다.
+
+```
+<!-- guide-tooling:begin claude -->
+...레지스트리와 템플릿에서 생성한 내용...
+<!-- guide-tooling:end claude sha256=XXXXXXXXXXXX -->
+```
+
+종료 표시에는 생성 내용의 sha256 앞 12자리를 기록합니다. `doc-verify`의 STR-GENERATED-SYNC 검사가 이 값으로 상태를 판정합니다.
+
+| 상태 | 판정 | 조치 |
+|------|------|------|
+| 생성 구간을 손으로 고침(내용과 sha256이 다름) | 오류 | 변경을 되돌리고 레지스트리나 템플릿을 고칩니다. |
+| 레지스트리나 템플릿이 바뀌어 다시 생성해야 함 | 경고 | `python3 tools/render_claude_md.py --repo ../<저장소>`로 다시 생성하고 PR을 만듭니다. |
+| 생성 구간이 없음 | 경고 | CLAUDE.md에 시작, 종료 표시를 넣고 생성기를 실행합니다. |
+
+레지스트리 변경을 오류가 아니라 경고로 처리하는 이유는 순서 때문입니다. 오류로 처리하면 guide-tooling을 머지하기 전에는 가이드 저장소에서 새 내용으로 다시 생성할 수 없고, 머지한 뒤에는 가이드 저장소 4개가 동시에 실패합니다.
 
 ### 오탐 처리
 
